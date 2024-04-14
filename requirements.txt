@@ -2,3 +2,4 @@ jupyterlab
 python-dotenv
 pybotters
 pandas
+ta-lib
