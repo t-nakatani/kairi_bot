@@ -10,7 +10,7 @@ class ATRKairiBot:
     async def run(self):
         await self.strategy.initalize_setting()
         await self.strategy.prepare()
-        await self.strategy.entry()
+        await self.strategy.execute()
         pass
 
     
