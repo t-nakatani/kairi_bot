@@ -1,0 +1,1 @@
+1,16,31,46 * * * * /work/src/main.py >> /work/logs/test.log 2>&1

@@ -1,7 +1,7 @@
 FROM python:3.10
 
 RUN apt-get update && \
-    apt-get install -y build-essential wget cron
+    apt-get install -y build-essential wget cron vim
 
 RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
     tar -xvzf ta-lib-0.4.0-src.tar.gz && \

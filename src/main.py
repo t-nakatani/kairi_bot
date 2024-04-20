@@ -1,3 +1,5 @@
+#!/usr/local/bin/python3
+
 import os
 import asyncio
 import pybotters
@@ -7,7 +9,7 @@ from utils import get_current_time
 from kairi_bot import ATRKairiBot
 
 
-load_dotenv('.env')
+load_dotenv('/work/.env')
 
 apis = {
     'bybit': [os.getenv('API_KEY'), os.getenv('API_SECRET')]
