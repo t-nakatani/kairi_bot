@@ -50,32 +50,42 @@ class Strategy:
     async def fetch_order(self):
         self.orders = await self.exchange.get_order(self.pair_symbol)
 
-    async def get_entry_signal(self):
+    async def calc_indecator(self):
         klines = await self.exchange.get_klines(pair_symbol=self.pair_symbol, interval=self.interval, limit=self.num_candles + 1)
         klines = klines.astype({'open': float, 'high': float, 'low': float, 'close': float})
         close = klines['close'].to_list()[-1]
         ma = klines['close'][:self.num_candles].mean()
         atr = ta.ATR(klines['high'], klines['low'], klines['close'], timeperiod=self.num_candles).to_list()[-1]
+        return close, ma, atr
+
+
+    def get_entry_signal(self, close, ma, atr):
         entry_price = ma + atr * 3
 
         signal = Signal.ON if close > entry_price else Signal.OFF
         print(f'[TradingStrategy]-get_entry_signal: {close=}, {entry_price=}, signal={signal}')
         return signal
 
-    def calc_tp_sl(self):
-        pass
+    def calc_tp_sl(self, ma, atr):
+        tp_price = adjust_price(ma + atr * 10, self.symbol_info['price_tick'])
+        sl_price = adjust_price(ma, self.symbol_info['price_tick'])
+        return tp_price, sl_price
 
     def update_tp_sl(self):
         pass
 
-    async def entry(self):
-        entry_signal = await self.get_entry_signal()
+    async def entry(self, close, ma, atr):
+        entry_signal = self.get_entry_signal(close, ma, atr)
         if entry_signal is Signal.OFF:
             print(f'[TradingStrategy]-entry: entry signal is OFF')
             return
         
         qty = 2
-        await self.exchange.create_order(self.pair_symbol, qty, order_type='Market', side='Buy', price=None, reduce_only=False)
+        tp_price, sl_price = self.calc_tp_sl(ma, atr)
+
+        await self.exchange.create_order(
+            self.pair_symbol, qty, order_type='Market', side='Buy', reduce_only=False, takeProfit=str(tp_price), stopLoss=str(sl_price)
+            )
         print(f'[TradingStrategy]-entry: order is created')
         pass
 
@@ -85,8 +95,9 @@ class Strategy:
 
     async def execute(self):
         print(f'[TradingStrategy]-execute: position={self.position}, orders={self.orders}')
+        close, ma, atr = await self.calc_indecator()
         if self.position is None:
-            await self.entry()
+            await self.entry(close, ma, atr)
 
         self.update_tp_sl()
         pass

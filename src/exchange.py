@@ -77,16 +77,16 @@ class Exchange():
             # print('[exchange]-set_leverage:', content)
             return content['retMsg']
 
-    async def create_order(self, pair_symbol, qty, order_type='Limit', side='Buy', price=None, reduce_only=False):
+    async def create_order(self, pair_symbol, qty, order_type='Limit', side='Buy', reduce_only=False, **kwargs):
         data = data={
                 'category': "linear",
                 'symbol': pair_symbol,
                 'side': side,
                 'orderType': order_type,
-                # 'price': price,
                 'qty': qty if type(qty) == str else str(qty),
                 'reduceOnly': reduce_only,
         }
+        data.update(kwargs)
         print('[exchange]-create_order:', data)
 
         async with self.client.post("/v5/order/create", data=data) as resp:
